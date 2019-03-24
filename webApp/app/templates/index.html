@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>My Data Dashboard</title>
+
+<!--import script files needed from plotly and bootstrap-->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<!--script src="https://cdn.plot.ly/plotly-latest.min.js"--><!--/script-->
+
+</head>
+
+<body>
+
+<!--navbar links-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+   <a class="navbar-brand" href="#">Data Dashboard</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse"
+  data-target="#navbarTogglerDemo02"
+  aria-controls="navbarTogglerDemo02" aria-expanded="false"
+  aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+    <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+      <li class="nav-item">
+        <a class="nav-link" href="https://www.udacity.com">Udacity</a>
+      </li>
+      <li class="nav-item invisible">
+        <a class="nav-link" href="#">Other Link</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!--middle section-->
+<div class="row">
+
+    <!--social media buttons column-->
+    <div class="col-1 border-right">
+        <div id="follow-me" class="mt-3">
+            <a href="https://www.linkedin.com/in/akira-kudo-0721135/">
+                <img src="/static/img/linkedinlogo.png" alt="linkedin" class="img-fluid mb-4 ml-2">
+            </a>
+            <a href="https://github.com/akudo37/dog_breed">
+                <img src="/static/img/githublogo.png" alt="github" class="img-fluid ml-2">
+            </a>
+        </div>
+    </div>
+
+    <!--visualizations column-->
+    <div class="col-11">
+
+      <!--descriptions-->
+      <div class="row">
+        <div id="descriptions" class="mt-3">
+            <h2 id="tag-line">Dog Breed Classifier</h2>
+            <h4 id="tag-line" class="text-muted">Classify dog breed (or human face resemblance to one of them)</h4>
+        </div>
+      </div>
+
+      <div class="row">
+        <!--form-->
+        <div class="col-6 align-self-center">
+          <div id="file_uploader" class="mt-3 ml-3">
+            <form action="" method="post" enctype="multipart/form-data">
+
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <!--input class="btn btn-outline-secondary" type="submit" value="Predict"-->
+                  <input class="btn btn-primary" type="submit" value="Predict" disabled>
+                </div>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="customFile" name="file">
+                    <label class="custom-file-label" for="customFile">Select file...</label>
+                </div>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary reset">Cancel</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!--preduction_result-->
+      <div class="row">
+        <div class="col-6 align-self-center mt-3 text-center">
+          {% if result_str %}
+
+          <h6>{{ result_str }}
+            {% if prediction %}
+            <a href="{{ ref_url }}" class="stretched-link"
+            onclick="window.open('{{ ref_url }}', 'newwindow',
+              'width=600,height=500,left=600,top=250'); return false;"><u>"{{ prediction}}".</u>
+            </a>
+            {% endif %}
+          </h6>
+          {% if prediction %}
+          <p>(Click the link to search actual pictures of the breed.)</p>
+          {% endif %}
+
+          <img src="{{ url_for('image_feed') }}" class="img-thumbnail">
+          {% endif %}
+        </div>
+      </div>
+    <div>
+</div>
+
+<!--footer section-->
+<div id="footer" class="container"></div>
+
+</body>
+
+
+<footer>
+  <script>
+  // Add the following code if you want the name of the file appear on select
+  $(".custom-file-input").on("change", function() {
+    var fileName = $(this).val().split("\\").pop();
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+  });
+
+  $('.custom-file-input').on('change', handleFileSelect);
+
+  function handleFileSelect(evt) {
+      $('#preview').remove();// 繰り返し実行時の処理
+      $(this).parents('.input-group').after('<div id="preview"></div>');
+      var files = evt.target.files;
+
+      for (var i = 0, f; f = files[i]; i++) {
+
+          var reader = new FileReader();
+
+          reader.onload = (function(theFile) {
+              return function(e) {
+                  if (theFile.type.match('image.*')) {
+                      var $html = ['<div class="d-inline-block mr-1 mt-1"><img class="img-thumbnail" src="',
+                      e.target.result,'" title="', escape(theFile.name),
+                      '" style="height:300px;" /><div class="small text-muted text-center">',
+                      escape(theFile.name),'</div></div>'].join('');// 画像では画像のプレビューとファイル名の表示
+                  } else {
+                      var $html = ['<div class="d-inline-block mr-1"><span class="small">',
+                      escape(theFile.name),'</span></div>'].join('');//画像以外はファイル名のみの表示
+                  }
+
+                  $('#preview').append($html);
+              };
+          })(f);
+
+          reader.readAsDataURL(f);
+      }
+
+    $(this).next('.custom-file-label').html(+ files.length + ' file is selected');
+
+    $(this).parents('.input-group').find('.btn').prop('disabled', false);//enable button
+  }
+
+  //ファイルの取消
+  $('.reset').click(function(){
+      $(this).parent().prev().children('.custom-file-label').html('Select file...');
+      $('.custom-file-input').val('');
+      $('#preview').remove('');
+
+      $(this).parents('.input-group').find('.btn').prop('disabled', true);//disable button
+  })
+  </script>
+</footer>
+
+
+</html>

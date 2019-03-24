@@ -1,0 +1,7 @@
+.ipynb_checkpoints/
+webApp/__pycache__/
+webApp/app/__pycache__/
+webApp/models/DogResnet50Data.npz
+dog_app.ipynb
+webAppHeroku/
+dogbreedenv/
