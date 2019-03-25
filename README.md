@@ -9,9 +9,9 @@ web app screenshot:<br>
 ![predicted_dog](images/screenshot.png)<br>
 
 ### Libraries used in the project
-- python==3.6.8
-- Keras==2.0.9
-- tensorflow==1.3.0
+- python==3.7.1
+- Keras==2.1.0
+- tensorflow==1.13.1
 - Flask==1.0.2
 - opencv-python==4.0.0.21
 - Pillow==5.4.1
