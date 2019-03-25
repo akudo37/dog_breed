@@ -92,9 +92,9 @@
       <!--preduction_result-->
       <div class="row">
         <div class="col-6 align-self-center mt-3 text-center">
-          {% if result_str %}
+          {% if message %}
 
-          <h6>{{ result_str }}
+          <h6>{{ message }}
             {% if prediction %}
             <a href="{{ ref_url }}" class="stretched-link"
             onclick="window.open('{{ ref_url }}', 'newwindow',
@@ -106,7 +106,8 @@
           <p>(Click the link to search actual pictures of the breed.)</p>
           {% endif %}
 
-          <img src="{{ url_for('image_feed') }}" class="img-thumbnail">
+          <img src="{{ image_feed }}" class="img-thumbnail" style="height:300px;">
+
           {% endif %}
         </div>
       </div>
@@ -131,7 +132,8 @@
 
   function handleFileSelect(evt) {
       $('#preview').remove();// 繰り返し実行時の処理
-      $(this).parents('.input-group').after('<div id="preview"></div>');
+      $(this).parents('.input-group').after('<div id="preview" class="align-self-center mt-5 text-center"></div>');
+
       var files = evt.target.files;
 
       for (var i = 0, f; f = files[i]; i++) {

@@ -6,6 +6,8 @@ from flask import session
 from werkzeug.utils import secure_filename
 from app.wrangle_data import classify_dog, add_face_rectangles
 import cv2
+import base64
+import io
 
 # http://flask.pocoo.org/docs/1.0/patterns/fileuploads/
 ALLOWED_EXTENSIONS = set(['jpeg', 'jpg'])
@@ -29,43 +31,31 @@ def index():
             flash('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(image_path)
+            jpegdata = file.read()
+            image_feed = 'data:image/jpeg;base64,' + base64.b64encode(jpegdata).decode('ascii')
+            image_path = io.BytesIO(jpegdata)  # we can use jpeg data on memory as a file
+
             result_str, prediction = classify_dog(image_path)
-            session['image_path'] = image_path
-            session['result_str'] = result_str
+
             if result_str == 'face':
-                result_str = 'Detected a face looks like '
+                message = 'Detected a face looks like '
             elif result_str == 'dog':
-                result_str = 'Detected a dog looks like '
+                message = 'Detected a dog looks like '
             else:
-                result_str = 'Neither dog nor face'
+                message = 'Neither dog nor face'
 
             if prediction:
+                if result_str == 'face':
+                    img = add_face_rectangles(image_path)
+                    jpegdata = cv2.imencode('.jpg', img)[1]
+                    image_feed = 'data:image/jpeg;base64,' + base64.b64encode(jpegdata).decode('ascii')
+
                 ref_url = 'https://www.google.com/search?q=dog+breed+' + prediction.replace(' ', '+') + '&tbm=isch'
             else:
                 ref_url = ''
             print(ref_url)
 
-            return render_template('index.html', result_str=result_str,
-                        prediction=prediction, ref_url=ref_url)
+            return render_template('index.html', message=message,
+                        prediction=prediction, ref_url=ref_url, image_feed=image_feed)
 
-    return render_template('index.html', result_str=None, prediction=None, ref_url=None)
-
-@app.route('/image_feed')
-def image_feed():
-    """Image data feed. Put this in the src attribute of an img tag."""
-    if 'image_path' in session:
-        img = cv2.imread(session['image_path'])
-
-        if 'result_str' in session and session['result_str'] == 'face':
-            img = add_face_rectangles(session['image_path'])
-
-        frame = cv2.imencode('.jpg', img)[1].tobytes()
-        os.remove(session['image_path'])
-        return Response(b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n',
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
-    else:
-        return Response("",
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    return render_template('index.html', message=None, prediction=None, ref_url=None,image_feed=None)

@@ -6,7 +6,7 @@ from keras.models import Sequential
 from keras.layers import Dropout, Flatten, Dense
 from keras.applications.resnet50 import ResNet50, preprocess_input
 import pickle
-
+from PIL import Image
 
 # global variables
 face_cascade = None
@@ -20,6 +20,7 @@ dogNames = None
 # path to tensor functions
 def path_to_tensor(img_path):
     # loads RGB image as PIL.Image.Image type
+    img_path.seek(0)
     img = image.load_img(img_path, target_size=(224, 224))
     # convert PIL.Image.Image type to 3D tensor with shape (224, 224, 3)
     x = image.img_to_array(img)
@@ -34,7 +35,10 @@ def face_detector(img_path):
     if face_cascade is None:
         face_cascade = cv2.CascadeClassifier('./models/haarcascade_frontalface_alt.xml')
 
-    img = cv2.imread(img_path)
+    img_path.seek(0)
+    pil_img = Image.open(img_path)
+    file_bytes = np.asarray(pil_img, dtype=np.uint8)
+    img = cv2.cvtColor(file_bytes, cv2.COLOR_RGBA2BGR)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray)
 
@@ -47,7 +51,10 @@ def add_face_rectangles(img_path):
     if face_cascade is None:
         face_cascade = cv2.CascadeClassifier('./models/haarcascade_frontalface_alt.xml')
 
-    img = cv2.imread(img_path)
+    img_path.seek(0)
+    pil_img = Image.open(img_path)
+    file_bytes = np.asarray(pil_img, dtype=np.uint8)
+    img = cv2.cvtColor(file_bytes, cv2.COLOR_RGBA2BGR)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray)
 
